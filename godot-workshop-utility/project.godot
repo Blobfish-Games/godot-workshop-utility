@@ -21,7 +21,16 @@ _global_script_class_icons={
 [application]
 
 config/name="Godot Workshop Utility"
+run/main_scene="res://main.tscn"
 config/icon="res://icon.png"
+
+[autoload]
+
+SteamService="*res://steam_service.gd"
+
+[display]
+
+window/size/width=800
 
 [gui]
 
