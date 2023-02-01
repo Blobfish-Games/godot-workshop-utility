@@ -114,3 +114,7 @@ func _on_SelectPreviewButton_pressed() -> void:
 
 func _on_Instructions_meta_clicked(meta) -> void:
 	OS.shell_open(MOD_LOADER_URL)
+
+
+func _on_TermsOfServiceLabel_meta_clicked(meta) -> void:
+	Steam.activateGameOverlayToWebPage(SteamService.STEAM_WORKSHOP_AGREEMENT_URL)

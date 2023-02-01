@@ -229,4 +229,5 @@ autowrap = true
 [connection signal="pressed" from="MarginContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer2/SelectModButton" to="." method="_on_SelectModButton_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/SelectPreviewButton" to="." method="_on_SelectPreviewButton_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/VBoxContainer/VBoxContainer2/UploadButton" to="." method="_on_UploadButton_pressed"]
+[connection signal="meta_clicked" from="MarginContainer/VBoxContainer/VBoxContainer/VBoxContainer2/TermsOfServiceLabel" to="." method="_on_TermsOfServiceLabel_meta_clicked"]
 [connection signal="meta_clicked" from="MarginContainer/VBoxContainer/HBoxContainer/Instructions" to="." method="_on_Instructions_meta_clicked"]
