@@ -11,3 +11,8 @@ Small utility used to upload content to Steam Workshop with Godot. It is early i
     - Beta Branch: optionally put the name a specific branch for your modders (so not all players will have to choose a launch option on starting the game)
     
 Launching the executable through Steam should now allow you to upload workshop items.
+
+## Options
+
+1. Add a ***tags*** key to the ***steam_data.json*** file and set its value to an array of tags corresponding to the ones you've set in the Steam backend. (***Edit Steamworks settings*** > ***Workshop*** > ***Tags***) 
+This will allow users to set tags for their mod. The default maximum number of tags per mod is set to 5 but you can change it by changing the value of the ***max_tags*** variable in ***main.gd***.

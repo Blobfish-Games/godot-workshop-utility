@@ -1,10 +1,12 @@
 extends Node
 
 signal log_message(message)
+signal tags_set(tags)
 
 const STEAM_WORKSHOP_AGREEMENT_URL: String = "https://steamcommunity.com/sharedfiles/workshoplegalagreement"
 
 var steam_app_id: int = -1
+var steam_workshop_tags: Array = []
 
 
 func initialize() -> void:
@@ -24,6 +26,10 @@ func initialize() -> void:
 		if !file_content.has("app_id"):
 			emit_signal("log_message", "The steam_data file does not contain an app ID, mod uploading will not work.")
 			return
+		
+		if file_content.has("tags"):
+			steam_workshop_tags = file_content.tags as Array
+			emit_signal("tags_set", steam_workshop_tags)
 		
 		steam_app_id = file_content.app_id as int
 	else:
