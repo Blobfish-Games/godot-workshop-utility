@@ -1,0 +1,75 @@
+name: Build Godot Workshop Utility
+
+on:
+  push:
+    tags:
+      - '*'
+env:
+  GODOT_TAG: godot-3.6.1-custom.1
+  TEMPLATE_ZIP: godotsteam-g361-s162-gs3301-templates.tar.xz
+  TEMPLATE_DIR: /root/.local/share/godot/templates/gs3.6.1-custom.1
+  WINDOWS_TEMPLATE: godotsteam.361.template.win64.exe
+  LINUX_TEMPLATE: godotsteam.361.template.x86_64
+  MAC_TEMPLATE: macos.zip
+  EXPORT_NAME: GodotWorkshopUtility
+
+jobs:
+  export:
+    name: Export Godot Workshop Utility
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+    container:
+      image: ghcr.io/blobfish-games/godotsteam-ci:3.6.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: robinraju/release-downloader@v1
+        with:
+          repository: GodotSteam/GodotSteam
+          tag: v3.30.1
+          fileName: ${{ env.TEMPLATE_ZIP }} # downloaded to $GITHUB_WORKSPACE
+          tarBall: false
+          zipBall: false
+          extract: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: download custom templates and preparation
+        run: |
+          apt-get update && apt-get install xz-utils
+          mkdir -p "$TEMPLATE_DIR"
+          tar -xf "$GITHUB_WORKSPACE/$TEMPLATE_ZIP" -C "$TEMPLATE_DIR"
+
+          # update export presets with custom template path
+          ls -la
+          cp export_presets.example.cfg godot-workshop-utility/export_presets.cfg
+          ./scripts/update-export-setting.py godot-workshop-utility/export_presets.cfg preset.0.options custom_template/release \"${TEMPLATE_DIR}/${WINDOWS_TEMPLATE}\"
+          ./scripts/update-export-setting.py godot-workshop-utility/export_presets.cfg preset.1.options custom_template/release \"${TEMPLATE_DIR}/${LINUX_TEMPLATE}\"
+          ./scripts/update-export-setting.py godot-workshop-utility/export_presets.cfg preset.2.options custom_template/release \"${TEMPLATE_DIR}/${MAC_TEMPLATE}\"
+          # debug template needs to be set for Mac until next Godot version update. https://github.com/godotengine/godot/pull/108930
+          ./scripts/update-export-setting.py godot-workshop-utility/export_presets.cfg preset.2.options custom_template/debug \"${TEMPLATE_DIR}/${MAC_TEMPLATE}\"
+
+          # folder structure
+          mkdir -v -p build
+
+      - name: Build Windows
+        run: |
+          cd godot-workshop-utility
+          xvfb-run godot --quiet --export windows ../build/$EXPORT_NAME.exe
+          cp ${TEMPLATE_DIR}/steam_api64.dll ../build/
+      - name: Build Linux
+        run: |
+          cd godot-workshop-utility
+          xvfb-run godot --quiet --export linux ../build/$EXPORT_NAME.x86_64
+          cp ${TEMPLATE_DIR}/libsteam_api.so ../build/
+      - name: Build Mac
+        run: |
+          cd godot-workshop-utility
+          xvfb-run godot --quiet --export mac ../build/$EXPORT_NAME.zip
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: builds
+          path: build/
