@@ -7,42 +7,91 @@ const MOD_LOADER_URL: String = "https://github.com/GodotModding/godot-mod-loader
 
 var tag_dict := {}
 
+@onready var _mod_selection_dropdown: OptionButton = %ModSelectionDropdown
 @onready var _file_dialog: FileDialog = %FileDialog
 @onready var _preview_image_dialog: FileDialog = %PreviewImageDialog
 @onready var _file_line_edit: LineEdit = %FileLineEdit
+@onready var _workshop_title_line_edit: LineEdit = %WorkshopTitleLineEdit
 @onready var _workshop_id_line_edit: LineEdit = %WorkshopIDLineEdit
 @onready var _preview_line_edit: LineEdit = %PreviewLineEdit
-@onready var _scroll_container: ScrollContainer = %ScrollContainer
-@onready var _scrollbar: VScrollBar = %ScrollContainer.get_v_scroll_bar()
 @onready var _console_content: Label = %ConsoleContent
 @onready var _tag_list: ItemList = %TagList
 @onready var _tag_container: VBoxContainer = %TagContainer
 @onready var _upload_container: VBoxContainer = %UploadContainer
 @onready var _tag_label: Label = %TagLabel
+@onready var _select_file_button: Button = %SelectFileButton
+@onready var _upload_button: Button = %UploadButton
+@onready var _select_preview_button: Button = %SelectPreviewButton
+@onready var _terms_of_service_label: RichTextLabel = %TermsOfServiceLabel
+@onready var _instructions: RichTextLabel = %Instructions
 
 
 func _ready() -> void:
-	_tag_container.hide()
-	_upload_container.size_flags_horizontal = SIZE_SHRINK_CENTER
+	_mod_selection_dropdown.item_selected.connect(_on_mod_selected)
+	_select_file_button.pressed.connect(_on_select_file_pressed)
+	_select_preview_button.pressed.connect(_on_select_image_preview_pressed)
+	_file_dialog.file_selected.connect(_on_file_selected)
+	_preview_image_dialog.file_selected.connect(_on_preview_image_selected)
+	_upload_button.pressed.connect(_on_upload_pressed)
+	_terms_of_service_label.meta_clicked.connect(_on_tos_meta_clicked)
+	_instructions.meta_clicked.connect(_on_label_meta_clicked)
+
+	Steam.item_created.connect(_on_workshop_mod_created)
+	Steam.item_updated.connect(_on_workshop_mod_updated)
 
 	SteamService.log_message.connect(_log_in_console)
 	SteamService.tags_set.connect(_on_tags_set)
+
+	_tag_container.hide()
+	_upload_container.size_flags_horizontal = SIZE_SHRINK_CENTER
+
 	SteamService.initialize()
 
-	var _error_create: int = Steam.item_created.connect(_on_workshop_mod_created)
-	var _error_update: int = Steam.item_updated.connect(_on_workshop_mod_updated)
+	_populate_existing_items()
+
+func _populate_existing_items() -> void:
+	Steam.ugc_query_completed.connect(_on_query_completed)
+	var handle: int = Steam.createQueryUserUGCRequest(Steam.current_steam_id, Steam.USER_UGC_LIST_PUBLISHED, Steam.UGC_MATCHING_UGC_TYPE_ITEMS_READY_TO_USE,
+		Steam.USER_UGC_LIST_SORT_ORDER_LAST_UPDATED_DESC, SteamService.steam_app_id, SteamService.steam_app_id, 1)
+	Steam.sendQueryUGCRequest(handle)
+
+
+func _on_query_completed(handle: int, result: int, results_returned: int, _total_matching: int, _cached: bool, _next_cursor: String) -> void:
+	if result != Steam.RESULT_OK:
+		_log_in_console("Existing mods couldn't be fetched.")
+		_workshop_id_line_edit.editable = true
+		return
+
+	for index: int in range(results_returned):
+		var item: Dictionary = Steam.getQueryUGCResult(handle, index)
+		_mod_selection_dropdown.add_item(item.title + " - " + str(item.file_id))
+		_mod_selection_dropdown.set_item_metadata(_mod_selection_dropdown.get_item_index(item.file_id), item)
+	Steam.releaseQueryUGCRequest(handle)
+
+
+func _on_mod_selected(index: int) -> void:
+	_tag_list.deselect_all()
+	if index == 0:
+		_workshop_title_line_edit.text = ""
+		_workshop_id_line_edit.text = ""
+		return
+
+	var meta: Dictionary = _mod_selection_dropdown.get_item_metadata(index)
+	_workshop_title_line_edit.text = str(meta.title)
+	_workshop_id_line_edit.text = str(meta.file_id)
+	var tags: PackedStringArray = meta.tags.split(",")
+	for tag_index: int in range(_tag_list.item_count):
+		if _tag_list.get_item_text(tag_index) in tags:
+			_tag_list.select(tag_index, false)
 
 
 func _log_in_console(msg: String) -> void:
-	var date_time: Dictionary = Time.get_datetime_dict_from_system()
-	var date_prefix = "%02d:%02d:%02d - " % [date_time.hour, date_time.minute, date_time.second]
+	var time_prefix: String = Time.get_time_string_from_system() + " - "
 
 	if _console_content.text == "":
-		_console_content.text += date_prefix + msg
+		_console_content.text += time_prefix + msg
 	else:
-		_console_content.text += "\n" + date_prefix + msg
-
-	_scroll_container.scroll_vertical = int(_scrollbar.max_value)
+		_console_content.text += "\n" + time_prefix + msg
 
 
 func _on_tags_set(tags: Array) -> void:
@@ -55,9 +104,9 @@ func _on_tags_set(tags: Array) -> void:
 		_tag_list.add_item(tags[i])
 
 
-func _on_UploadButton_pressed() -> void:
+func _on_upload_pressed() -> void:
 	if _file_line_edit.text == "":
-		_log_in_console("No mod selected.")
+		_log_in_console("No file selected.")
 		return
 
 	if _workshop_id_line_edit.text == "":
@@ -71,7 +120,7 @@ func _update_workshop_item() -> void:
 	_log_in_console("Uploading workshop item with ID %s..." % _workshop_id_line_edit.text)
 	var update_handle: int = Steam.startItemUpdate(SteamService.steam_app_id, int(_workshop_id_line_edit.text))
 
-	Steam.setItemTitle(update_handle, _file_line_edit.text.get_basename().get_file())
+	Steam.setItemTitle(update_handle, _workshop_title_line_edit.text)
 
 	var preview_path: String = ProjectSettings.globalize_path(_preview_line_edit.text)
 
@@ -121,15 +170,17 @@ func _on_workshop_mod_updated(result: int, needs_to_accept_agreement: bool, _fil
 		Steam.activateGameOverlayToWebPage(SteamService.STEAM_WORKSHOP_AGREEMENT_URL, Steam.OVERLAY_TO_WEB_PAGE_MODE_DEFAULT)
 
 
-func _on_FileDialog_file_selected(path: String) -> void:
+func _on_file_selected(path: String) -> void:
 	if path.get_extension() != "zip" && path.get_extension() != "pck":
 		_log_in_console("Please select a super.zip or super.pck file")
 		return
 
 	_file_line_edit.text = path
+	if _workshop_title_line_edit.text == "":
+		_workshop_title_line_edit.text = _file_line_edit.text.get_basename().get_file()
 
 
-func _on_PreviewImageDialog_file_selected(path: String) -> void:
+func _on_preview_image_selected(path: String) -> void:
 	if path.get_extension() != "png" && path.get_extension() != "jpg" && path.get_extension() != "jpeg":
 		_log_in_console("Please select an image (.png, super.jpg or super.jpeg)")
 		return
@@ -137,17 +188,17 @@ func _on_PreviewImageDialog_file_selected(path: String) -> void:
 	_preview_line_edit.text = path
 
 
-func _on_SelectModButton_pressed() -> void:
+func _on_select_file_pressed() -> void:
 	_file_dialog.popup()
 
 
-func _on_SelectPreviewButton_pressed() -> void:
+func _on_select_image_preview_pressed() -> void:
 	_preview_image_dialog.popup()
 
 
-func _on_Instructions_meta_clicked(_meta) -> void:
-	OS.shell_open(MOD_LOADER_URL)
+func _on_label_meta_clicked(meta: Variant) -> void:
+	OS.shell_open(meta)
 
 
-func _on_TermsOfServiceLabel_meta_clicked(_meta) -> void:
+func _on_tos_meta_clicked(_meta) -> void:
 	Steam.activateGameOverlayToWebPage(SteamService.STEAM_WORKSHOP_AGREEMENT_URL, Steam.OVERLAY_TO_WEB_PAGE_MODE_DEFAULT)

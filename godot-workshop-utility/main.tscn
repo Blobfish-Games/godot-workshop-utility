@@ -31,11 +31,32 @@ use_native_dialog = true
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1523265117]
 layout_mode = 2
-alignment = 1
+theme_override_constants/separation = 20
 
-[node name="Control" type="Control" parent="MarginContainer/VBoxContainer" unique_id=730441801]
+[node name="Title" type="Label" parent="MarginContainer/VBoxContainer" unique_id=2100071265]
+unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 40
+text = "Godot Workshop Utility"
+horizontal_alignment = 1
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=315648806]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=101370530]
+layout_mode = 2
+text = "Select existing Mod"
+
+[node name="ModSelectionDropdown" type="OptionButton" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1010073582]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+selected = 0
+item_count = 1
+popup/item_0/text = "Upload new Mod"
+popup/item_0/id = 0
 
 [node name="UploadContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=727782497]
 unique_name_in_owner = true
@@ -59,7 +80,7 @@ alignment = 1
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/UploadContainer/HBoxContainer/VBoxContainer" unique_id=2084743822]
 layout_mode = 2
-text = "Upload a mod to the workshop"
+text = "Upload Settings"
 horizontal_alignment = 1
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/UploadContainer/HBoxContainer/VBoxContainer" unique_id=1361257978]
@@ -72,7 +93,7 @@ size_flags_horizontal = 3
 placeholder_text = "Select mod file"
 editable = false
 
-[node name="SelectModButton" type="Button" parent="MarginContainer/VBoxContainer/UploadContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=400375481]
+[node name="SelectFileButton" type="Button" parent="MarginContainer/VBoxContainer/UploadContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=400375481]
 unique_name_in_owner = true
 layout_mode = 2
 text = "..."
@@ -88,13 +109,20 @@ placeholder_text = "Select preview image"
 editable = false
 
 [node name="SelectPreviewButton" type="Button" parent="MarginContainer/VBoxContainer/UploadContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=1108959131]
+unique_name_in_owner = true
 layout_mode = 2
 text = "..."
+
+[node name="WorkshopTitleLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/UploadContainer/HBoxContainer/VBoxContainer" unique_id=855997678]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Workshop Title"
 
 [node name="WorkshopIDLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/UploadContainer/HBoxContainer/VBoxContainer" unique_id=1667973242]
 unique_name_in_owner = true
 layout_mode = 2
-placeholder_text = "No workshop ID"
+placeholder_text = "Workshop ID"
+editable = false
 
 [node name="TagContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/UploadContainer/HBoxContainer" unique_id=483785075]
 unique_name_in_owner = true
@@ -138,38 +166,38 @@ layout_mode = 2
 text = "Upload"
 
 [node name="TermsOfServiceLabel" type="RichTextLabel" parent="MarginContainer/VBoxContainer/UploadContainer/VBoxContainer2" unique_id=1083626666]
+unique_name_in_owner = true
 layout_mode = 2
 bbcode_enabled = true
 text = "By submitting this item, you agree to the workshop terms of service
 "
 scroll_active = false
 
-[node name="Control2" type="Control" parent="MarginContainer/VBoxContainer" unique_id=1799372840]
-layout_mode = 2
-size_flags_vertical = 3
-
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=745262669]
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_constants/separation = 10
 
 [node name="Instructions" type="RichTextLabel" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1872431697]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 bbcode_enabled = true
 text = "Instructions
 
-1) Select the mod you want to upload (.zip / super.pck) (needs to be compatible with ModLoader)
+1) Select an existing mod to update it or create a new one
 
-2) Select a preview image if it's the first time uploading the mod or if you want to change it
+2) Select the zipped mod you want to upload (needs to be compatible with the [url=https://github.com/GodotModding/godot-mod-loader]Godot Mod Loader[/url])
 
-3) Select tags for your mod if available (leave empty if you don't want to change them)
+3) Select a preview image if it's the first time uploading the mod or if you want to change it
 
-4) Add the mod's workshop ID if you're updating it, leave empty if it's a new mod
+4) Select tags for your mod if available
 
-5) Upload it and take note of the workshop ID if it's a new mod. Use it when you want to update it
+5) Check and edit your mod in the Steam Workshop, then set it public when it's ready
 
-6) Check and edit your mod in the Steam Workshop, then set it public when it's ready"
-scroll_active = false
+
+[url=https://github.com/Blobfish-Games/godot-workshop-utility]Godot Workshop Utility Github[/url]"
+fit_content = true
 
 [node name="Console" type="TextEdit" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=183953507]
 unique_name_in_owner = true
@@ -190,7 +218,6 @@ theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/Console/MarginContainer" unique_id=1208473175]
-unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -200,11 +227,3 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 7
-
-[connection signal="file_selected" from="MarginContainer/FileDialog" to="." method="_on_FileDialog_file_selected"]
-[connection signal="file_selected" from="MarginContainer/PreviewImageDialog" to="." method="_on_PreviewImageDialog_file_selected"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/UploadContainer/HBoxContainer/VBoxContainer/HBoxContainer2/SelectModButton" to="." method="_on_SelectModButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/UploadContainer/HBoxContainer/VBoxContainer/HBoxContainer/SelectPreviewButton" to="." method="_on_SelectPreviewButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/UploadContainer/VBoxContainer2/UploadButton" to="." method="_on_UploadButton_pressed"]
-[connection signal="meta_clicked" from="MarginContainer/VBoxContainer/UploadContainer/VBoxContainer2/TermsOfServiceLabel" to="." method="_on_TermsOfServiceLabel_meta_clicked"]
-[connection signal="meta_clicked" from="MarginContainer/VBoxContainer/HBoxContainer/Instructions" to="." method="_on_Instructions_meta_clicked"]

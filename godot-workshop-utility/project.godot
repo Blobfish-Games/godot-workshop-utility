@@ -21,8 +21,9 @@ SteamService="*res://steam_service.gd"
 
 [display]
 
-window/size/viewport_width=800
-window/size/viewport_height=650
+window/size/viewport_width=1200
+window/size/viewport_height=1000
+window/stretch/scale=1.2
 
 [gui]
 
