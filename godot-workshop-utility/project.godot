@@ -32,7 +32,11 @@ common/drop_mouse_on_gui_input_disabled=true
 [rendering]
 
 rendering_device/driver.windows="d3d12"
+textures/vram_compression/import_etc2_astc=true
 
 [steam]
 
 initialization/embed_callbacks=true
+initialization/app_id=0
+initialization/initialize_on_startup=false
+multiplayer_peer/max_channels=4
