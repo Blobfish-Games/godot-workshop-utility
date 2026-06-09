@@ -6,22 +6,13 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=4
-
-_global_script_classes=[ {
-"base": "PanelContainer",
-"class": "Main",
-"language": "GDScript",
-"path": "res://main.gd"
-} ]
-_global_script_class_icons={
-"Main": ""
-}
+config_version=5
 
 [application]
 
 config/name="Godot Workshop Utility"
 run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.6")
 config/icon="res://icon.png"
 
 [autoload]
@@ -30,17 +21,17 @@ SteamService="*res://steam_service.gd"
 
 [display]
 
-window/size/width=800
-window/size/height=650
+window/size/viewport_width=800
+window/size/viewport_height=650
 
 [gui]
 
 common/drop_mouse_on_gui_input_disabled=true
 
-[physics]
-
-common/enable_pause_aware_picking=true
-
 [rendering]
 
-environment/default_environment="res://default_env.tres"
+rendering_device/driver.windows="d3d12"
+
+[steam]
+
+initialization/embed_callbacks=true
