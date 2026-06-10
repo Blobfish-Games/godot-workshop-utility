@@ -71,6 +71,8 @@ func _on_query_completed(handle: int, result: int, results_returned: int, _total
 
 
 func _on_mod_selected(index: int) -> void:
+	_file_line_edit.text = ""
+	_preview_line_edit.text = ""
 	_tag_list.deselect_all()
 	if index == 0:
 		_workshop_title_line_edit.text = ""

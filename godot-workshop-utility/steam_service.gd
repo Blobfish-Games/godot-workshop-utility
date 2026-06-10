@@ -59,7 +59,7 @@ func initialize() -> void:
 func get_game_dir() -> String:
 	var game_install_directory := OS.get_executable_path().get_base_dir()
 
-	if OS.get_name() == "OSX":
+	if OS.get_name() == "macOS":
 		game_install_directory = game_install_directory.get_base_dir().get_base_dir()
 		if game_install_directory.ends_with(".app"):
 			game_install_directory = game_install_directory.get_base_dir()

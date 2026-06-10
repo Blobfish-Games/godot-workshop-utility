@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - '*'
-    branches:
-      - 'godot4'
 env:
   GODOT_VERSION: 4.6.3
   EXPORT_NAME: GodotWorkshopUtility
@@ -19,27 +17,30 @@ jobs:
     defaults:
       run:
         shell: bash
-    container:
-      image: barichello/godot-ci:4.6.3
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          lfs: true
       - name: Setup
         run: |
-          mkdir -v -p ~/.local/share/godot/export_templates/
-          mkdir -v -p ~/.config/
-          mv /root/.config/godot ~/.config/godot
-          mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
           mkdir -v -p build/windows
           mkdir -v -p build/linux
           mkdir -v -p build/mac
+          cp templates/steam_api64.dll build/windows/
+          cp templates/libsteam_api.so build/linux/
       - name: Build
         run: |
+          GODOT_BIN="$(readlink -f templates/godotsteam.463.editor.x86_64)"
           EXPORT_DIR="$(readlink -f build)"
           cd $PROJECT_PATH
-          godot --headless --verbose --export-release "windows" "$EXPORT_DIR/windows/$EXPORT_NAME.exe"
-          godot --headless --verbose --export-release "linux" "$EXPORT_DIR/linux/$EXPORT_NAME.x86_64"
-          godot --headless --verbose --export-release "macos" "$EXPORT_DIR/mac/$EXPORT_NAME.zip"
+          $GODOT_BIN --headless --verbose --export-release "windows" "$EXPORT_DIR/windows/$EXPORT_NAME.exe"
+          $GODOT_BIN --headless --verbose --export-release "linux" "$EXPORT_DIR/linux/$EXPORT_NAME.x86_64"
+          $GODOT_BIN --headless --verbose --export-release "macos" "$EXPORT_DIR/mac/$EXPORT_NAME.zip"
+      - name: Extract Mac version
+        run: |
+          unzip -d build/mac/ build/mac/$EXPORT_NAME.zip
+          rm build/mac/$EXPORT_NAME.zip
       - name: Upload Artifacts
         uses: actions/upload-artifact@v7
         with:
