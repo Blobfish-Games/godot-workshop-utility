@@ -9,6 +9,10 @@ var steam_app_id: int = -1
 var steam_workshop_tags: Array = []
 
 
+func _ready() -> void:
+	get_window().content_scale_factor = DisplayServer.screen_get_scale()
+
+
 func initialize() -> void:
 	var init_result: Dictionary = Steam.steamInitEx()
 	if init_result["status"] == 0:
