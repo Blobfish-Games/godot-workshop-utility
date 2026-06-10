@@ -38,6 +38,7 @@ func _ready() -> void:
 
 	Steam.item_created.connect(_on_workshop_mod_created)
 	Steam.item_updated.connect(_on_workshop_mod_updated)
+	Steam.ugc_query_completed.connect(_on_query_completed)
 
 	SteamService.log_message.connect(_log_in_console)
 	SteamService.tags_set.connect(_on_tags_set)
@@ -49,8 +50,8 @@ func _ready() -> void:
 
 	_populate_existing_items()
 
+
 func _populate_existing_items() -> void:
-	Steam.ugc_query_completed.connect(_on_query_completed)
 	var handle: int = Steam.createQueryUserUGCRequest(Steam.current_steam_id, Steam.USER_UGC_LIST_PUBLISHED, Steam.UGC_MATCHING_UGC_TYPE_ITEMS_READY_TO_USE,
 		Steam.USER_UGC_LIST_SORT_ORDER_LAST_UPDATED_DESC, SteamService.steam_app_id, SteamService.steam_app_id, 1)
 	Steam.sendQueryUGCRequest(handle)
@@ -65,7 +66,7 @@ func _on_query_completed(handle: int, result: int, results_returned: int, _total
 	for index: int in range(results_returned):
 		var item: Dictionary = Steam.getQueryUGCResult(handle, index)
 		_mod_selection_dropdown.add_item(item.title + " - " + str(item.file_id))
-		_mod_selection_dropdown.set_item_metadata(_mod_selection_dropdown.get_item_index(item.file_id), item)
+		_mod_selection_dropdown.set_item_metadata(_mod_selection_dropdown.item_count - 1, item)
 	Steam.releaseQueryUGCRequest(handle)
 
 
@@ -158,8 +159,24 @@ func _on_workshop_mod_created(result: int, file_id: int, needs_to_accept_agreeme
 		Steam.activateGameOverlayToWebPage(SteamService.STEAM_WORKSHOP_AGREEMENT_URL, Steam.OVERLAY_TO_WEB_PAGE_MODE_DEFAULT)
 
 	_workshop_id_line_edit.text = str(file_id)
-
 	_update_workshop_item()
+
+	var selected_tags: Array[String]
+	for index in _tag_list.get_selected_items():
+		selected_tags.append(_tag_list.get_item_text(index))
+	selected_tags = selected_tags.slice(0, max_tags)
+
+	var meta: Dictionary[String, Variant] = {
+		"file_id": file_id,
+		"title": _workshop_title_line_edit.text,
+		"tags": ",".join(selected_tags),
+	}
+
+	_mod_selection_dropdown.add_item(_workshop_title_line_edit.text + " - " + str(file_id))
+	var index: int = _mod_selection_dropdown.item_count - 1
+	_mod_selection_dropdown.set_item_metadata(index, meta)
+	_mod_selection_dropdown.select(index)
+	_mod_selection_dropdown.item_selected.emit(index)
 
 
 func _on_workshop_mod_updated(result: int, needs_to_accept_agreement: bool, _file_id: int) -> void:
