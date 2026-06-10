@@ -10,7 +10,21 @@ var steam_workshop_tags: Array = []
 
 
 func _ready() -> void:
-	get_window().content_scale_factor = DisplayServer.screen_get_scale()
+	# adapted from Godot's EditorSettings::get_auto_display_scale()
+	if OS.has_feature("macos"):
+		get_window().content_scale_factor = DisplayServer.screen_get_scale()
+	if OS.has_feature("windows"):
+		get_window().content_scale_factor = DisplayServer.screen_get_dpi() / 96.0
+	if OS.has_feature("linuxbsd"):
+		var smallest_dimension: int = min(DisplayServer.screen_get_size().x, DisplayServer.screen_get_size().y)
+		if DisplayServer.screen_get_dpi() >= 192 && smallest_dimension >= 1400:
+			get_window().content_scale_factor = 2.0
+		elif smallest_dimension >= 1700:
+			get_window().content_scale_factor = 1.5
+		elif smallest_dimension <= 800:
+			get_window().content_scale_factor = 0.75
+		else:
+			get_window().content_scale_factor = 1.0
 
 
 func initialize() -> void:
